@@ -15,10 +15,10 @@ Africa={'Congo','Nile','Niger','Zambezi'};
 Eurasia={'Amur','Anabar','Ayeyarwada','Kuloy','Ob','Mezen','Lena','Yenisei','Pechora','Pyasina','Khatanga','Olenyok' ...
     ,'Indigirka','Kolyma','Anadyr','Yangtze','Mekong','Ganges','Brahmaputra','Indus','Volga'};
 
-CurrRiv={'StLawrence'}; %if you want to do a single river, use this
+CurrRiv={'Amazon'}; %if you want to do a single river, use this
 Americas=[NorthAmerica SouthAmerica];
 World=[Americas Africa Eurasia];
-RunRiv=CurrRiv; %you can switch this to CurrRiv if you only want to run one river.
+RunRiv=World; %you can switch this to CurrRiv if you only want to run one river.
 Satellite={'Jason2','Envisat'}; %either Envisat or Jason2 or both, need a cell with 1 or more strings
 J2=[]; Env=[];
 %omit tital stations
@@ -29,8 +29,8 @@ for iriv=1:length(RunRiv)
     for jsat=1:length(Satellite)
         %% uselib('altimetry')
         %set the datapath and input values for river data analysis
-        datapath='C:\Users\coss.31\Documents\MATH\Steves_final_Toolbox\AltimetryToolbox\IN';
-        library='C:\Users\coss.31\Documents\MATH\Steves_final_Toolbox\AltimetryToolbox';
+        datapath='C:\Users\coss.31\Documents\MATH\Steves_final_Toolbox\AltimetryToolbox\MEaSUREsToolbox2016\IN';
+        library='C:\Users\coss.31\Documents\MATH\Steves_final_Toolbox\AltimetryToolbox\MEaSUREsToolbox2016';
         addpath(genpath(datapath))%this is the path to the raw data (GDR outputs + shapefiles + misc data)
         addpath(genpath(library)) %this is the path to the altimetry toolbox
         rivername=RunRiv{iriv}; satellite=Satellite{jsat}; stations=0; %set current river, satellite, and # of stations (0 is default)

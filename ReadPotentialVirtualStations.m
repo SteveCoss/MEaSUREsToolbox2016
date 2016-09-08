@@ -26,7 +26,11 @@ else
         VS(i).X=S(i).X;
         VS(i).Y=S(i).Y;
         VS(i).FLOW_Dist=S(i).Flow_Dist;
+        if exist(S(i).Island_Flg)
         VS(i).Island=S(i).Island_Flg;
+        else
+         VS(i).Island=-1;
+        end
         if satellite(1)=='E'
             Ncyc=94;
             VS(i).Rate=18; %Hz

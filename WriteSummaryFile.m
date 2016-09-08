@@ -1,7 +1,7 @@
 function WriteSummaryFile(J2,Env,RivName)
 % writeDEM=true
 filename=[RivName '_NetCDF_List.txt'];
-FID = fopen(fullfile('C:\Users\coss.31\Documents\MATH\Steves_final_Toolbox\AltimetryToolbox\Dataproduct',filename),'wt');
+FID = fopen(fullfile('C:\Users\coss.31\Documents\MATH\Steves_final_Toolbox\AltimetryToolbox\MEaSUREsToolbox2016\Dataproduct',filename),'wt');
 
 if J2(1).Flag == 1
 %    fprintf(FID,'There were no Jason 2 crossings for this river \r\n')

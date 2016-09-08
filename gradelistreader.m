@@ -3,7 +3,7 @@
 function [Egrades,Jgrades]=gradelistreader(sat)
 %envi
 if numel(sat)==2;
-gradefileE=fullfile('C:\Users\coss.31\Documents\MATH\Steves_final_Toolbox\AltimetryToolbox\IN' ...
+gradefileE=fullfile('C:\Users\coss.31\Documents\MATH\Steves_final_Toolbox\AltimetryToolbox\MEaSUREsToolbox2016\IN' ...
     ,strcat(sat(2),'_gradesC','.xlsx'));
 [NUM,TXT,RAW]=xlsread(cell2mat(gradefileE));
 if length(TXT)>length(NUM)
@@ -24,7 +24,7 @@ Egrades(i).stats.stdAVG=NUM((i),5);
 end
 
 %jason
-gradefileJ=fullfile('C:\Users\coss.31\Documents\MATH\Steves_final_Toolbox\AltimetryToolbox\IN' ...
+gradefileJ=fullfile('C:\Users\coss.31\Documents\MATH\Steves_final_Toolbox\AltimetryToolbox\MEaSUREsToolbox2016\IN' ...
     ,strcat(sat(1),'_gradesC','.xlsx'));
 [NUM,TXT,RAW]=xlsread(cell2mat(gradefileJ));
 if length(TXT)>length(NUM)
@@ -45,7 +45,7 @@ Jgrades(i).stats.std=NUM((i),4);
 Jgrades(i).stats.stdAVG=NUM((i),5);
 end
 else if strcmp(sat,'Envisat');
-        gradefileE=fullfile('C:\Users\coss.31\Documents\MATH\Steves_final_Toolbox\AltimetryToolbox\IN' ...
+        gradefileE=fullfile('C:\Users\coss.31\Documents\MATH\Steves_final_Toolbox\AltimetryToolbox\MEaSUREsToolbox2016\IN' ...
             ,strcat(sat,'_gradesC','.xlsx'));
         [NUM,TXT,RAW]=xlsread(cell2mat(gradefileE));
         for i=1:length(TXT)
@@ -61,7 +61,7 @@ else if strcmp(sat,'Envisat');
          Jgrades=nan;
          Jnse=nan;
     else
-        gradefileJ=fullfile('C:\Users\coss.31\Documents\MATH\Steves_final_Toolbox\AltimetryToolbox\IN' ...
+        gradefileJ=fullfile('C:\Users\coss.31\Documents\MATH\Steves_final_Toolbox\AltimetryToolbox\MEaSUREsToolbox2016\IN' ...
             ,strcat(sat,'_gradesC','.xlsx'));
         [NUM,TXT,RAW]=xlsread(cell2mat(gradefileJ));
         for i=1:length(TXT)

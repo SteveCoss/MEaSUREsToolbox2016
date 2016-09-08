@@ -93,7 +93,7 @@ vIDs.pkAvg=netcdf.defVar(tGroupID,'pkbar','NC_DOUBLE',tdimid);
 %2.6 filter
 %%filter group needs approprate flag attributes (values/masks/meanings)
 IceDimId = netcdf.defDim(fGroupID,'years',size(Ice,1));
-demdimid = netcdf.defDim(ncid,'DEMused',length(Filter.DEMused));
+demdimid = netcdf.defDim(ncid,'DEMused',netcdf.getConstant('NC_UNLIMITED'));
 
 vIDs.nND=netcdf.defVar(fGroupID,'nNODATA','NC_INT',[]);
 vIDs.riverh=netcdf.defVar(fGroupID,'riverh','NC_DOUBLE',[]);
@@ -150,7 +150,6 @@ netcdf.putAtt(sGroupID,vIDs.SampY,'units','degrees_north');
 %flags
 netcdf.putAtt(sGroupID,vIDs.Island,'long_name','Island Flag');
 netcdf.putAtt(sGroupID,vIDs.Island,'standard_name','Island_Flag');
-netcdf.putAtt(sGroupID,vIDs.Island,'Fill_value','-1');
 netcdf.putAtt(sGroupID,vIDs.Island,'valid_range','0,1');
 netcdf.putAtt(sGroupID,vIDs.Island,'flag_masks','1');
 netcdf.putAtt(sGroupID,vIDs.Island,'flag_meanings','island_present_in_polygon ');
@@ -288,7 +287,7 @@ netcdf.putVar(fGroupID,vIDs.nND,VS.AltDat.nNODATA);
 netcdf.putVar(fGroupID,vIDs.riverh,Filter.AbsHeight);
 netcdf.putVar(fGroupID,vIDs.maxh,Filter.AbsHeight+Filter.MaxFlood);
 netcdf.putVar(fGroupID,vIDs.minh,Filter.AbsHeight-Filter.MinFlood);
-netcdf.putVar(fGroupID,vIDs.DEMused,0,length(Filter.DEMused), Filter.DEMused);
+netcdf.putVar(fGroupID,vIDs.DEMused,1,length(Filter.DEMused), Filter.DEMused);
 
 %4.6 ice
 if size(Ice,1)>2
