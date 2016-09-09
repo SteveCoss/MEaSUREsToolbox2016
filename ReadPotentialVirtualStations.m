@@ -21,12 +21,18 @@ else
         VS(i).Pass=S(i).Pass_Num;
         ID=strsplit(VS(i).ID,'_');
         VS(i).Id=str2num(cell2mat(ID(3)));
+        if ~isempty(S(i).Landsat_ID);
         VS(i).LSID=S(i).Landsat_ID;
+        else
+            VS(i).LSID='NA';
+        end
         VS(i).Satellite=satellite;
         VS(i).X=S(i).X;
         VS(i).Y=S(i).Y;
         VS(i).FLOW_Dist=S(i).Flow_Dist;
-        if exist(S(i).Island_Flg)
+        
+        if isfield(S(i),'Island_Flg')
+           
         VS(i).Island=S(i).Island_Flg;
         else
          VS(i).Island=-1;
