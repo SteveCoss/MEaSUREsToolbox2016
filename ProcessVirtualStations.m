@@ -15,10 +15,10 @@ Africa={'Congo','Nile','Niger','Zambezi'};
 Eurasia={'Amur','Anabar','Ayeyarwada','Kuloy','Ob','Mezen','Lena','Yenisei','Pechora','Pyasina','Khatanga','Olenyok' ...
     ,'Indigirka','Kolyma','Anadyr','Yangtze','Mekong','Ganges','Brahmaputra','Indus','Volga'};
 
-CurrRiv={'Uruguay'}; %if you want to do a single river, use this
+CurrRiv={'Mississippi'}; %if you want to do a single river, use this
 Americas=[NorthAmerica SouthAmerica];
 World=[Americas Africa Eurasia];
-RunRiv=Eurasia; %you can switch this to CurrRiv if you only want to run one river.
+RunRiv=World; %you can switch this to CurrRiv if you only want to run one river.
 Satellite={'Jason2','Envisat'}; %either Envisat or Jason2 or both, need a cell with 1 or more strings
 J2=[]; Env=[];
 %omit tital stations
