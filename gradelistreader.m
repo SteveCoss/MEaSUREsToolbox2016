@@ -48,6 +48,13 @@ else if strcmp(sat,'Envisat');
         gradefileE=fullfile('C:\Users\coss.31\Documents\MATH\Steves_final_Toolbox\AltimetryToolbox\MEaSUREsToolbox2016\IN' ...
             ,strcat(sat,'_gradesC','.xlsx'));
         [NUM,TXT,RAW]=xlsread(cell2mat(gradefileE));
+        if length(TXT)>length(NUM)
+            missing=length(TXT)-length(NUM);
+            start=length(NUM)
+            for i=1:(missing)
+                NUM( start+(i),:)=nan;
+            end
+        end
         for i=1:length(TXT)
             Egrades(i).name=TXT((i),1);
             Egrades(i).grade=TXT((i),2);
@@ -64,6 +71,13 @@ else if strcmp(sat,'Envisat');
         gradefileJ=fullfile('C:\Users\coss.31\Documents\MATH\Steves_final_Toolbox\AltimetryToolbox\MEaSUREsToolbox2016\IN' ...
             ,strcat(sat,'_gradesC','.xlsx'));
         [NUM,TXT,RAW]=xlsread(cell2mat(gradefileJ));
+         if length(TXT)>length(NUM)
+            missing=length(TXT)-length(NUM);
+            start=length(NUM)
+            for i=1:(missing)
+                NUM( start+(i),:)=nan;
+            end
+        end
         for i=1:length(TXT)
             Jgrades(i).name=TXT((i),1);
             Jgrades(i).grade=TXT((i),2);

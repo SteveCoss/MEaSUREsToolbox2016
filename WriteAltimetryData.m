@@ -1,9 +1,12 @@
 function WriteAltimetryData(VS,Filter,Ice)
 
 %level 2: these are the level 2 data from the platforms... not archived here
-%level 3: these are the actual elevations being output by Chan's scripts,
+%Unprocessed GDR data: these are the actual elevations being output by Chan's scripts,
 %            on a footprint-by-footprint basis
 %level 4: these are the timeseries of averaged products
+
+
+
 
 fname=['DataProduct/' VS.ID '.nc'];
 
@@ -24,19 +27,24 @@ fGroupID=netcdf.defGrp(ncid,'Filter');
 
 %2.1 other root group items
 %2.1.1 text string ids
-londimid = netcdf.defDim(ncid,'X',netcdf.getConstant('NC_UNLIMITED'));
-latdimid = netcdf.defDim(ncid,'Y',netcdf.getConstant('NC_UNLIMITED'));
-gradedimid = netcdf.defDim(ncid,'grade',netcdf.getConstant('NC_UNLIMITED'));
-Timeimid = netcdf.defDim(ncid,'T',netcdf.getConstant('NC_UNLIMITED'));
-distdimid= netcdf.defDim(ncid,'distance',netcdf.getConstant('NC_UNLIMITED'));
-filldimid= netcdf.defDim(ncid,'root',netcdf.getConstant('NC_UNLIMITED'));
+londimid = netcdf.defDim(ncid,'X',1);
+latdimid = netcdf.defDim(ncid,'Y',1);
+gradedimid = netcdf.defDim(ncid,'grade',1);
+distdimid= netcdf.defDim(ncid,'distance',1);
+filldimid= netcdf.defDim(ncid,'root',1);
+satdimid= netcdf.defDim(ncid,'sat',length(VS.Satellite));
+VSIDdimid= netcdf.defDim(ncid,'ID',length(VS.ID));
+
+
+
+
 %2.2.1 define coordinate variables
 vIDs.Lon=netcdf.defVar(ncid,'lon','NC_DOUBLE',londimid);
 vIDs.Lat=netcdf.defVar(ncid,'lat','NC_DOUBLE',latdimid);
 
 %2.2.2 define items
-vIDs.ID=netcdf.defVar(ncid,'ID','NC_CHAR',filldimid);
-vIDs.sat=netcdf.defVar(ncid,'sat','NC_CHAR',filldimid);
+vIDs.ID=netcdf.defVar(ncid,'ID','NC_CHAR',VSIDdimid);
+vIDs.sat=netcdf.defVar(ncid,'sat','NC_CHAR',satdimid);
 
 vIDs.FlowDistance=netcdf.defVar(ncid,'Flow_Dist','NC_DOUBLE',distdimid);
 vIDs.rate=netcdf.defVar(ncid,'rate','NC_DOUBLE',filldimid);
@@ -50,23 +58,21 @@ else
     vIDs.std=netcdf.defVar(ncid,'std','NC_DOUBLE',gradedimid);
     vIDs.stdAVG=netcdf.defVar(ncid,'stdAVG','NC_DOUBLE',gradedimid);
 end
-vIDs.TimeStamp=netcdf.defVar(ncid,'TimeStamp','NC_DOUBLE',Timeimid);
+
 
 %2.3 sampling 
 %2.3.1 dimensions
-SceneDimId = netcdf.defDim(sGroupID,'scene',netcdf.getConstant('NC_UNLIMITED'));
+SceneDimId = netcdf.defDim(sGroupID,'scene',length(VS.LSID));
 XDimId = netcdf.defDim(sGroupID,'X',length(VS.X)-1);
- XLimId = netcdf.defDim(sGroupID,'Xlimit',2);
+
 YDimId = netcdf.defDim(sGroupID,'Y',length(VS.Y)-1);
- YLimId = netcdf.defDim(sGroupID,'Ylimit',2);
+
 IceDimId= netcdf.defDim(sGroupID,'icedat',size(Ice,1));
 cDimId = netcdf.defDim(sGroupID,'coordinates',5);
 %2.3.2 definitions
 vIDs.LandsatSceneID=netcdf.defVar(sGroupID,'scene','NC_CHAR',SceneDimId);
 vIDs.SampX=netcdf.defVar(sGroupID,'lonbox','NC_DOUBLE',XDimId);
-vIDs.XLim=netcdf.defVar(sGroupID,'lon_Limits','NC_DOUBLE', XLimId);
 vIDs.SampY=netcdf.defVar(sGroupID,'latbox','NC_DOUBLE',YDimId);
-vIDs.YLim=netcdf.defVar(sGroupID,'lat_Limits','NC_DOUBLE', YLimId);
 vIDs.Island=netcdf.defVar(sGroupID,'island','NC_INT',SceneDimId);
 
 %2.4 Unprocessed GDR Data
@@ -76,12 +82,19 @@ UGDRYDimId = netcdf.defDim(UGDR_GroupID,'Y',ntAll);
 UGDRZDimId = netcdf.defDim(UGDR_GroupID,'Z',ntAll);
 UGDRTDimId = netcdf.defDim(UGDR_GroupID,'T',ntAll);
 
+
+
+
 vIDs.UGDR_Lon=netcdf.defVar(UGDR_GroupID,'lon','NC_DOUBLE',UGDRXDimId);
 vIDs.UGDR_Lat=netcdf.defVar(UGDR_GroupID,'lat','NC_DOUBLE',UGDRYDimId);
+
 vIDs.UGDR_h=netcdf.defVar(UGDR_GroupID,'h','NC_DOUBLE',UGDRZDimId);
+
+
 vIDs.UGDR_sig0=netcdf.defVar(UGDR_GroupID,'sig0','NC_DOUBLE',l3DimId);
 vIDs.UGDR_pk=netcdf.defVar(UGDR_GroupID,'pk','NC_DOUBLE',l3DimId);
 vIDs.UGDR_cyc=netcdf.defVar(UGDR_GroupID,'cycle','NC_INT',l3DimId);
+
 vIDs.UGDR_t=netcdf.defVar(UGDR_GroupID,'time','NC_DOUBLE',UGDRTDimId);
 vIDs.UGDR_heightfilter=netcdf.defVar(UGDR_GroupID,'heightfilter','NC_INT',l3DimId);
 vIDs.UGDR_icefilter=netcdf.defVar(UGDR_GroupID,'icefilter','NC_INT',l3DimId);
@@ -126,142 +139,232 @@ netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'title',['GRRATS (Global Rive
 netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'Conventions', 'CF-1.6' ); % required to indicate that data is CF complient
 netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'institution', 'Ohio State University, School of Earth Sciences' ); 
 netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'source', 'MEaSUREs OSU ALT toolbox 2016' ); 
+keywordz='EARTH SCIENCE,TERRESTRIAL HYDROSPHERE,SURFACE WATER,SURFACE WATER PROCESSES/MEASUREMENTS,STAGE HEIGHT';
+netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'keywords', keywordz );
+netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'keywords_vocabulary', 'Global Change Master Directory (GCMD)' );
+netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'cdm_data_type', 'THREDDS' ); 
+netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'creator_name', 'Coss,Steve' );
+netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'creator_email', 'Coss.31@osu.edu' );
+netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'project', 'MEaSUREs OSU' );
+netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'processing_level', 'processed and unprocessed L2 altimeter data from inside a river mask' );
+%% summary
+sum ='The Global River Radar Altimeter Time Series (GRRATS) are river heights from OSTM/Jason-2 and Envisat that are conformed to look like river gauges via virtual stations (VS). The purpose of these heights are to provide satellite altimetric river height data in a form that is more recognizable to the observational community and as a way to get users use to using satellite data for river hydrology. GRRATS provides data from 914 VS on 39 of the world’s largest rivers (wider than 900m). River heights were processed with limits established by DEM data from inside the VS. When applicable, times of ice cover are also flagged consistently. To allow for maximum usability, all processing data is included (original L2 data, filtering limits, etc.). When possible, data was validated with in situ gauges. Other locations were assigned a qualitative letter grade, based on the amount of missing data, agreement with nearby VS and identifiable seasonal cycle. Validation information (quantitative or qualitative) is packaged with each VS’s data to aid the end user in selection the best time series for their particular task.'; 
+netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'id', 'GRRATS(Global River Radar Altimeter Time Series)' );
+
+netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'summary', sum );
+if strcmp(VS.Satellite,'Jason2')
+netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'time_coverage_resolution', '~10 day' );
+else
+netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'time_coverage_resolution', '~35 day' );
+end
+
+%time globals
+Tstamp=clock;
+netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'date_created', datestr(Tstamp));
+netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'time_coverage_start',datestr(min(VS.AltDat.tAll))); 
+netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'time_coverage_end',datestr(max(VS.AltDat.tAll))); 
+% netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'time_coverage_duration',strcat(num2str(max(VS.AltDat.tAll)-min(VS.AltDat.tAll)),'days')); 
+%geospatial globals
+ylimmin=min(VS.Y);
+ylimmax=max(VS.Y);
+xlimmin= min(VS.X);
+xlimmax=max(VS.X);
+netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'geospatial_lon_min',xlimmin);
+netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'geospatial_lon_max',xlimmax);
+netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'geospatial_lon_units','degree_east');
+
+netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'geospatial_lat_min',ylimmax);
+netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'geospatial_lat_max',ylimmax);
+netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'geospatial_lat_units','degree_n');
+
+netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'geospatial_vertical_max',max(VS.AltDat.h));
+netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'geospatial_vertical_min',min(VS.AltDat.h));
+netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'geospatial_vertical_units','m');
+netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'geospatial_vertical_posative','up');
+
+
+
+
+
+
 %netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'history', '' ); 
 %netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'references', '' ); 
 
 %3.2 root group
 %3.2.1 coordinate units
-netcdf.putAtt(ncid,vIDs.Lat,'units','degrees_north');
+netcdf.putAtt(ncid,vIDs.Lat,'units','degree_north');
 netcdf.putAtt(ncid,vIDs.Lat,'long_name','latitude');
+netcdf.putAtt(ncid,vIDs.Lat,'standard_name','latitude');
 
-netcdf.putAtt(ncid,vIDs.Lon,'units','degrees_east');
+netcdf.putAtt(ncid,vIDs.Lon,'units','degree_east');
 netcdf.putAtt(ncid,vIDs.Lon,'long_name','longitude');
+netcdf.putAtt(ncid,vIDs.Lon,'standard_name','longitude');
+
 
 %3.2.2 other root group
 netcdf.putAtt(ncid,vIDs.ID,'long_name','reference_VS_ID');
+netcdf.putAtt(ncid,vIDs.ID,'standard_name','reference_vs_id');
+
 netcdf.putAtt(ncid,vIDs.FlowDistance,'long_name','distance_from_river_mouth');
+netcdf.putAtt(ncid,vIDs.FlowDistance,'standard_name','distance_from_river_mouth');
 netcdf.putAtt(ncid,vIDs.FlowDistance,'units','km');
 
 
 netcdf.putAtt(ncid,vIDs.sat,'long_name','satellite');
+netcdf.putAtt(ncid,vIDs.sat,'standard_name','satellite');
 netcdf.putAtt(ncid,vIDs.rate,'units','Hz');
 
 netcdf.putAtt(ncid,vIDs.rate,'long_name','sampling rate');
+netcdf.putAtt(ncid,vIDs.rate,'standard_name','sampling_rate');
+
 netcdf.putAtt(ncid,vIDs.pass,'long_name','pass_number');
+netcdf.putAtt(ncid,vIDs.pass,'standard_name','pass_number');
+%
 if ~isstruct(VS.grade);
-    netcdf.putAtt(ncid,vIDs.grade,'long_name','grade');
+    netcdf.putAtt(ncid,vIDs.grade,'long_name','qualitative letter grade');
+     netcdf.putAtt(ncid,vIDs.grade,'standard_name','qualitative_letter_grade');
 else
     netcdf.putAtt(ncid,vIDs.nse,'long_name','MAX nash sutcliffe efficiency');
+    netcdf.putAtt(ncid,vIDs.nse,'standard_name','max_nash_sutcliffe_efficiency');
+    
     netcdf.putAtt(ncid,vIDs.nseAVG,'long_name','average nash sutcliffe efficiency');
+     netcdf.putAtt(ncid,vIDs.nseAVG,'standard_name','average_nash_sutcliffe_efficiency');
+     
     netcdf.putAtt(ncid,vIDs.R,'long_name','correlation coefficient');
+     netcdf.putAtt(ncid,vIDs.R,'standard_name','correlation_coefficient');
+     
     netcdf.putAtt(ncid,vIDs.std,'long_name',' MIN standard deviation of error');
-     netcdf.putAtt(ncid,vIDs.std,'units','m');
+    netcdf.putAtt(ncid,vIDs.std,'standard_name','min_standard_deviation_of_error');
+    netcdf.putAtt(ncid,vIDs.std,'units','m');
+    
     netcdf.putAtt(ncid,vIDs.stdAVG,'long_name','average standard deviation of error');
+    netcdf.putAtt(ncid,vIDs.stdAVG,'standard_name','average_standard_deviation_of_error');
     netcdf.putAtt(ncid,vIDs.stdAVG,'units','m');
 end
-netcdf.putAtt(ncid,vIDs.TimeStamp,'long_name','Time at creation of file');
-netcdf.putAtt(ncid,vIDs.TimeStamp,'units','year month day hour minute second');
+
 
 %3.3 sampling group
 netcdf.putAtt(sGroupID,vIDs.LandsatSceneID,'long_name','Landsat Scene ID');
+netcdf.putAtt(sGroupID,vIDs.LandsatSceneID,'standard_name','landsat_scene_id');
+
 netcdf.putAtt(sGroupID,vIDs.SampX,'long_name','Longitude Box Extents');
-netcdf.putAtt(sGroupID,vIDs.XLim,'long_name','Longitude Limits');
-netcdf.putAtt(sGroupID,vIDs.XLim,'units','degrees_east');
+netcdf.putAtt(sGroupID,vIDs.SampX,'standard_name','longitude_box_extents');
+netcdf.putAtt(sGroupID,vIDs.SampX,'units','degree_east');
+
 netcdf.putAtt(sGroupID,vIDs.SampY,'long_name','Latitude Box Extents');
-netcdf.putAtt(sGroupID,vIDs.YLim,'long_name','Latitude Limits');
-netcdf.putAtt(sGroupID,vIDs.YLim,'units','degrees_north');
-netcdf.putAtt(sGroupID,vIDs.SampX,'units','degrees_east');
-netcdf.putAtt(sGroupID,vIDs.SampY,'units','degrees_north');
+netcdf.putAtt(sGroupID,vIDs.SampY,'standard_name','latitude_box_extents');
+netcdf.putAtt(sGroupID,vIDs.SampY,'units','degree_north');
+
 %flags
 netcdf.putAtt(sGroupID,vIDs.Island,'long_name','Island Flag');
-netcdf.putAtt(sGroupID,vIDs.Island,'standard_name','Island_Flag');
+netcdf.putAtt(sGroupID,vIDs.Island,'standard_name','island_flag');
 netcdf.putAtt(sGroupID,vIDs.Island,'Fill_value','-1');
 netcdf.putAtt(sGroupID,vIDs.Island,'valid_range','0,1');
 netcdf.putAtt(sGroupID,vIDs.Island,'flag_masks','1');
 netcdf.putAtt(sGroupID,vIDs.Island,'flag_meanings','island_present_in_polygon ');
 
 %3.4 Unprocessed GDR Data
-netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_Lon,'units','degrees_east');
+netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_Lon,'units','degree_east');
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_Lon,'long_name','longitude');
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_Lon,'standard_name','longitude');
 
-netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_Lat,'units','degrees_north');
+netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_Lat,'units','degree_north');
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_Lat,'long_name','latitude');
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_Lat,'standard_name','latitude');
 
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_h,'units','meters_above_EGM2008_geoid');
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_h,'positive','up');
-netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_h,'leng_name','unprocessed heights');
-
+netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_h,'long_name','unprocessed_heights');
+netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_h,'standard_name','unprocessed_heights');
 
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_sig0,'units','dB');
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_sig0,'long_name','Sigma0');
+netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_sig0,'standard_name','sigma0');
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_pk,'units','-');
 
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_cyc,'units','-');
-netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_cyc,'standard_name','Altimiter_cycle');
+netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_cyc,'standard_name','altimiter_cycle');
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_cyc,'long_name','Unprocessed_GDR_Altimiter_cycle');
 
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_t,'units','days since Jan-01-1900 00:00:00');
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_t,'long_name','time');
+netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_t,'standard_name','time');
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_t,'calendar','standard');
-
 
 %flags
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_heightfilter,'long_name','Good heights flag');
-netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_heightfilter,'standard_name','Good_heights_flag');
+netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_heightfilter,'standard_name','good_heights_flag');
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_heightfilter,'valid_range','0, 1');
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_heightfilter,'flag_masks','1');
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_heightfilter,'flag _meenings','height_passed_filter');
 %
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_icefilter,'long_name','No_ice_flag');
+netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_icefilter,'standard_name','no_ice_flag');
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_icefilter,'valid_range','0, 1');
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_icefilter,'flag_masks','1');
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_icefilter,'flag_meenings','height_recorded_at_time_of_no_ice');
 %
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_allfilter,'long_name','Combined_good_heights_and_ice_free_flag');
+netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_allfilter,'standard_name','combined_good_heights_and_ice_free_flag');
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_allfilter,'valid_range','0, 1');
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_allfilter,'flag_masks','1');
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_allfilter,'flag_meenings','Ice_free_heights_that_passed_height_filter');
 
 
 %3.5  timeseries 
-%3.5.1 units
+%3.5
 netcdf.putAtt(tGroupID,vIDs.time,'units','days since Jan-01-1900 00:00:00');
 netcdf.putAtt(tGroupID,vIDs.time,'calendar','standard');
 netcdf.putAtt(tGroupID,vIDs.time,'long_name','time');
+netcdf.putAtt(tGroupID,vIDs.time,'standard_name','time');
 
 netcdf.putAtt(tGroupID,vIDs.cycle,'units','-');
 netcdf.putAtt(tGroupID,vIDs.cycle,'long_name','altimiter cycle');
+netcdf.putAtt(tGroupID,vIDs.cycle,'standard_name','altimiter_cycle');
+
 netcdf.putAtt(tGroupID,vIDs.hbar,'units','meters_above_EGM2008_geoid');
-netcdf.putAtt(tGroupID,vIDs.hwbar,'units','meters_above_EGM2008_geoid');
-netcdf.putAtt(tGroupID,vIDs.sig0Avg,'units','dB');
-netcdf.putAtt(tGroupID,vIDs.pkAvg,'units','-');
-
-
-%3.5.2 timeseries long names
 netcdf.putAtt(tGroupID,vIDs.hbar,'long_name','Average Height');
+netcdf.putAtt(tGroupID,vIDs.hbar,'standard_name','average_height');
 netcdf.putAtt(tGroupID,vIDs.hbar,'positive','up');
 
+netcdf.putAtt(tGroupID,vIDs.hwbar,'units','meters_above_EGM2008_geoid');
 netcdf.putAtt(tGroupID,vIDs.hwbar,'long_name','Weighted Average Height');
+netcdf.putAtt(tGroupID,vIDs.hwbar,'standard_name','weighted_average__height');
 netcdf.putAtt(tGroupID,vIDs.hwbar,'positive','up');
 
+netcdf.putAtt(tGroupID,vIDs.sig0Avg,'units','dB');
 netcdf.putAtt(tGroupID,vIDs.sig0Avg,'long_name','Average Sigma0');
+netcdf.putAtt(tGroupID,vIDs.sig0Avg,'standard_name','average_sigma0');
+
+netcdf.putAtt(tGroupID,vIDs.pkAvg,'units','-');
 netcdf.putAtt(tGroupID,vIDs.pkAvg,'long_name','Average Peakiness');
+netcdf.putAtt(tGroupID,vIDs.pkAvg,'standard_name','average_peakiness');
 
 %3.6 filter
 netcdf.putAtt(fGroupID,vIDs.nND,'long_name','Number of Cycles without Data');
+netcdf.putAtt(fGroupID,vIDs.nND,'standard_name','number_of_cycles_without_data');
 netcdf.putAtt(fGroupID,vIDs.nND,'units','count');
+
 netcdf.putAtt(fGroupID,vIDs.riverh,'long_name','River elevation from filter file');
+netcdf.putAtt(fGroupID,vIDs.riverh,'standard_name','river_elevation_from_filter_file');
 netcdf.putAtt(fGroupID,vIDs.riverh,'units','meters_above_EGM2008_geoid');
+
 netcdf.putAtt(fGroupID,vIDs.maxh,'long_name','Maximum elevation allowed by filter');
+netcdf.putAtt(fGroupID,vIDs.maxh,'standard_name','maximum_elevation_allowed_by_filter');
 netcdf.putAtt(fGroupID,vIDs.maxh,'units','meters_above_EGM2008_geoid');
+
 netcdf.putAtt(fGroupID,vIDs.minh,'long_name','Minimum elevation allowed by filter');
+netcdf.putAtt(fGroupID,vIDs.minh,'standard_name','minimum_elevation_allowed_by_filter');
 netcdf.putAtt(fGroupID,vIDs.minh,'units','meters_above_EGM2008_geoid');
+
 netcdf.putAtt(fGroupID,vIDs.DEMused,'long_name','DEM used in height filter');
+netcdf.putAtt(fGroupID,vIDs.DEMused,'standard_name','dem_used_in_height_filter');
 %3.7 ice
 netcdf.putAtt(fGroupID,vIDs.icethaw,'long_name','Thaw dates for river');
+netcdf.putAtt(fGroupID,vIDs.icethaw,'standard_name','thaw_dates_for_river');
+
 netcdf.putAtt(fGroupID,vIDs.icefreeze,'long_name','Freeze dates for river');
+netcdf.putAtt(fGroupID,vIDs.icefreeze,'standard_name','freeze_dates_for_river');
 
 
 netcdf.endDef(ncid);
@@ -285,18 +388,16 @@ netcdf.putVar(ncid,vIDs.R,0,length(VS.grade),VS.grade.R);%grade
 netcdf.putVar(ncid,vIDs.std,0,length(VS.grade),VS.grade.std);%grade
 netcdf.putVar(ncid,vIDs.stdAVG,0,length(VS.grade),VS.grade.stdAVG);%grade
 end
-Tstamp=clock;
-netcdf.putVar(ncid,vIDs.TimeStamp,0,length(Tstamp),Tstamp);
+
+
+
+
 
 %4.2 sampling
 netcdf.putVar(sGroupID,vIDs.LandsatSceneID,0,length(VS.LSID),VS.LSID)
 netcdf.putVar(sGroupID,vIDs.SampX,VS.X(1:end-1));
-xlim=[max(VS.X) min(VS.X)];
-netcdf.putVar(sGroupID,vIDs.XLim,xlim);
 netcdf.putVar(sGroupID,vIDs.SampY,VS.Y(1:end-1));
-ylim=[max(VS.Y) min(VS.Y)];
-netcdf.putVar(sGroupID,vIDs.YLim,ylim);
- netcdf.putVar(sGroupID,vIDs.Island,0,length(VS.Island),VS.Island); 
+netcdf.putVar(sGroupID,vIDs.Island,0,length(VS.Island),VS.Island); 
 
 %4.3 Unprocessed GDR Data
 %datenum for jan1 1900
@@ -304,11 +405,13 @@ startdate=datenum(1900,1,1);
 
 netcdf.putVar(UGDR_GroupID,vIDs.UGDR_Lon,VS.AltDat.lon);
 netcdf.putVar(UGDR_GroupID,vIDs.UGDR_Lat,VS.AltDat.lat);
+
 netcdf.putVar(UGDR_GroupID,vIDs.UGDR_h,VS.AltDat.h);
 netcdf.putVar(UGDR_GroupID,vIDs.UGDR_sig0,VS.AltDat.sig0);
 netcdf.putVar(UGDR_GroupID,vIDs.UGDR_pk,VS.AltDat.PK);
 netcdf.putVar(UGDR_GroupID,vIDs.UGDR_cyc,VS.AltDat.c);
-netcdf.putVar(UGDR_GroupID,vIDs.UGDR_t,VS.AltDat.tAll-startdate);
+TiMe=VS.AltDat.tAll-startdate;
+netcdf.putVar(UGDR_GroupID,vIDs.UGDR_t,TiMe);
 netcdf.putVar(UGDR_GroupID,vIDs.UGDR_heightfilter,VS.AltDat.iGoodH+0);
 netcdf.putVar(UGDR_GroupID,vIDs.UGDR_icefilter,VS.AltDat.IceFlag+0);
 netcdf.putVar(UGDR_GroupID,vIDs.UGDR_allfilter,VS.AltDat.iGood+0);

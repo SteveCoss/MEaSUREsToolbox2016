@@ -15,7 +15,7 @@ Africa={'Congo','Nile','Niger','Zambezi'};
 Eurasia={'Amur','Anabar','Ayeyarwada','Kuloy','Ob','Mezen','Lena','Yenisei','Pechora','Pyasina','Khatanga','Olenyok' ...
     ,'Indigirka','Kolyma','Anadyr','Yangtze','Mekong','Ganges','Brahmaputra','Indus','Volga'};
 
-CurrRiv={'Mississippi'}; %if you want to do a single river, use this
+CurrRiv={'Congo'}; %if you want to do a single river, use this
 Americas=[NorthAmerica SouthAmerica];
 World=[Americas Africa Eurasia];
 RunRiv=World; %you can switch this to CurrRiv if you only want to run one river.
@@ -85,7 +85,7 @@ for iriv=1:length(RunRiv)
                     [VS(i).grade] = gradecheck(VS(i),satellite,rivername,Egrades,Jgrades);
                     
                     %%  write it to .nc
-                     WriteAltimetryData(VS(i),FilterData(i),IceData);
+                      WriteAltimetryData(VS(i),FilterData(i),IceData);
                     
                     WRITTEN{CT}=VS(i).ID;
                     CT=CT+1;
@@ -123,7 +123,7 @@ for iriv=1:length(RunRiv)
     
 end
 %% See how the bulk river data performs
-%
+% %
 [totmat,j2prop,envprop]=DoMetaPlots(RunRiv,J2,Env);
 
 J2sum=0; J2wri=0;
