@@ -9,23 +9,26 @@
 
 clear all; close all; clc;
 %% Create a list of rivers you want to run
+%% V2 shapefiles
+UseV2=true;
+%% 
 NorthAmerica={'Columbia','Mackenzie','StLawrence','Susquehanna', 'Yukon','Mississippi'};
 SouthAmerica={'Amazon','Orinoco','Tocantins','SaoFrancisco','Uruguay','Magdalena','Parana','Oiapoque','Essequibo','Courantyne'};
 Africa={'Congo','Nile','Niger','Zambezi'};
 Eurasia={'Amur','Anabar','Ayeyarwada','Kuloy','Ob','Mezen','Lena','Yenisei','Pechora','Pyasina','Khatanga','Olenyok' ...
     ,'Indigirka','Kolyma','Anadyr','Yangtze','Mekong','Ganges','Brahmaputra','Indus','Volga'};
 
-CurrRiv={'Congo'}; %if you want to do a single river, use this
+CurrRiv={'Yangtze'}; %if you want to do a single river, use this
 Americas=[NorthAmerica SouthAmerica];
 World=[Americas Africa Eurasia];
-RunRiv=World; %you can switch this to CurrRiv if you only want to run one river.
+RunRiv=CurrRiv; %you can switch this to CurrRiv if you only want to run one river.
 Satellite={'Jason2','Envisat'}; %either Envisat or Jason2 or both, need a cell with 1 or more strings
 J2=[]; Env=[];
 %omit tital stations
 tide=true;
 
 for iriv=1:length(RunRiv)
-    clearvars -except RunRiv Satellite iriv jsat J2 Env tide; %keep these on each loop. get rid of each river's data when moving to the next river
+    clearvars -except RunRiv Satellite iriv jsat J2 Env tide UseV2; %keep these on each loop. get rid of each river's data when moving to the next river
     for jsat=1:length(Satellite)
         %% uselib('altimetry')
         %set the datapath and input values for river data analysis
@@ -41,7 +44,7 @@ for iriv=1:length(RunRiv)
        
         [DoIce,icefile]=IceCheck(rivername); %check rivername to see if ice
         %% Read in virtual station metadata & shapefiles
-        [VS, Ncyc,S,stations] = ReadPotentialVirtualStations(rivername,satellite,stations); %get VS data from shapefile
+        [VS, Ncyc,S,stations] = ReadPotentialVirtualStations(rivername,satellite,stations,UseV2); %get VS data from shapefile
         if size(VS,1)>0
             DEM=zeros(length(stations),3);
             clear 'Gdat' %prevents errors from less Envi than J2stations
@@ -75,6 +78,7 @@ for iriv=1:length(RunRiv)
                 
                  VS(i).AltDat = CalcAvgHeights(FilterData(i).AbsHeight,VS(i).AltDat,VS(i).ID,IceData,DoPlotsAvg);
                 VS(i).AltDat.AbsHeight=FilterData(i).AbsHeight;
+                 VS(i).Riv=rivername;
                  %% add tide distance
                     if tide && VS(i).AltDat.Write
                     [VS(i)] = tidecheck(VS(i),rivername,Tname,Tdist);
@@ -82,7 +86,7 @@ for iriv=1:length(RunRiv)
                       
                 if VS(i).AltDat.Write && DoNetCDF
                     %% drop grades into VS/netcdf
-                    [VS(i).grade] = gradecheck(VS(i),satellite,rivername,Egrades,Jgrades);
+                     [VS(i).grade] = gradecheck(VS(i),satellite,rivername,Egrades,Jgrades);
                     
                     %%  write it to .nc
                       WriteAltimetryData(VS(i),FilterData(i),IceData);
@@ -110,7 +114,7 @@ for iriv=1:length(RunRiv)
                 end
             end
         end
-        VSpuller(VS,rivername,satellite);%saves the VS for each sat/riv combo
+        VSpuller(VS,rivername,satellite,UseV2);%saves the VS for each sat/riv combo
     end
     if ~exist('J2fl','var')
         J2(iriv).Flag = 1;

@@ -4,11 +4,14 @@ function WriteAltimetryData(VS,Filter,Ice)
 %Unprocessed GDR data: these are the actual elevations being output by Chan's scripts,
 %            on a footprint-by-footprint basis
 %level 4: these are the timeseries of averaged products
+contname=true;
 
-
-
-
-fname=['DataProduct/' VS.ID '.nc'];
+if contname
+[cont] = contlookup(VS);
+fname=['DataProduct/' cont '_' VS.ID '.nc'];
+else
+    fname=['DataProduct/' VS.ID '.nc'];
+end
 
 %% 1 extract dimensions from altimetry data
 nt=length(VS.AltDat.t); %number of measurement times
@@ -153,9 +156,9 @@ netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'id', 'GRRATS(Global River Ra
 
 netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'summary', sum );
 if strcmp(VS.Satellite,'Jason2')
-netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'time_coverage_resolution', '~10 day' );
+netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'time_coverage_resolution', '10 day' );
 else
-netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'time_coverage_resolution', '~35 day' );
+netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'time_coverage_resolution', '35 day' );
 end
 
 %time globals
@@ -173,9 +176,9 @@ netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'geospatial_lon_min',xlimmin)
 netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'geospatial_lon_max',xlimmax);
 netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'geospatial_lon_units','degree_east');
 
-netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'geospatial_lat_min',ylimmax);
+netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'geospatial_lat_min',ylimmin);
 netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'geospatial_lat_max',ylimmax);
-netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'geospatial_lat_units','degree_n');
+netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'geospatial_lat_units','degree_north');
 
 netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'geospatial_vertical_max',max(VS.AltDat.h));
 netcdf.putAtt(ncid,netcdf.getConstant('NC_GLOBAL'),'geospatial_vertical_min',min(VS.AltDat.h));

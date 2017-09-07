@@ -50,6 +50,16 @@ Temporary Items
 *.nc
 *.txt
 *.jpg
+*.shp
+*.shx
+*.dbf
+*.sbn
+*.cpg
+*.prj
+*.sbx
+*.xml
+*.lock
+*.mat
 #unwanted subdirectories
 IN/
 *.dbf

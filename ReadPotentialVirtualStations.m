@@ -1,5 +1,10 @@
-function [VS,Ncyc,S,stations] = ReadPotentialVirtualStations(fname,satellite,stations)
+function [VS,Ncyc,S,stations] = ReadPotentialVirtualStations(fname,satellite,stations,UseV2)
+if UseV2
+fnameshape=[fname '_' satellite 'V2'];
 fname=[fname '_' satellite];
+else
+fname=[fname '_' satellite];
+end
 
 if satellite(1)=='E'
 filecheck=fopen([fname '_0_18hz']);
@@ -11,7 +16,11 @@ if filecheck==-1
     Ncyc=[];
     S=[];
 else
-    S=shaperead(fname);
+    if UseV2
+    S=shaperead(fnameshape);
+    else
+           S=shaperead(fname);
+    end
     
     for i=1:length(S)
         VS(i).ID=S(i).Station_ID;
