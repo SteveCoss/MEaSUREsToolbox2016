@@ -1,20 +1,21 @@
 %% This program creates the initial filter boundaries
 %Written 8/2015 by Steve Tuozzolo
+%altered on 2.5.2018 to check DEM existence with isnan rather than >0
 
 function FilterData=CreateFilterData(VS,DEM,FilterData,stations);
 
 for i=stations
         FilterData(i).ID=VS(i).Id;
         DEMt=DEM(FilterData(i).ID+1,:);
-    if DEMt(1)>0 %check for SRTM data
+    if ~isnan(DEMt(1)) %check for SRTM data
         FilterData(i).AbsHeight=DEMt(1); %use SRTM data 1st
         FilterData(i).AvgGradient=VS(i).AltDat.AvgGradient(1);
         FilterData(i).DEMused='SRTM';
-    else if DEMt(3)>0 %check for GTOPO30/GMTED2010 data
+    else if ~isnan(DEMt(3)) %check for GTOPO30/GMTED2010 data
             FilterData(i).AbsHeight=DEMt(3); %use this data second
             FilterData(i).AvgGradient=VS(i).AltDat.AvgGradient(2);
             FilterData(i).DEMused='GTOPO30/GMTED2010';
-        else if DEMt(2)>0
+        else if ~isnan(DEMt(2))
                 FilterData(i).AbsHeight=DEMt(2); %ASTER data used.
                 FilterData(i).AvgGradient=VS(i).AltDat.AvgGradient(2);
                 FilterData(i).DEMused='ASTER';

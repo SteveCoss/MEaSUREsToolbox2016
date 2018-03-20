@@ -1,12 +1,13 @@
 function [VS,Ncyc,S,stations] = ReadPotentialVirtualStations(fname,satellite,stations,UseV2)
-if UseV2
+Riv=fname;
+if UseV2 & strcmp(satellite,'Envisat')||strcmp(satellite,'Jason2')
 fnameshape=[fname '_' satellite 'V2'];
 fname=[fname '_' satellite];
 else
 fname=[fname '_' satellite];
 end
 
-if satellite(1)=='E'
+if satellite(1:2)=='En'
 filecheck=fopen([fname '_0_18hz']);
 else
     filecheck=fopen([fname '_0_20hz']);
@@ -16,10 +17,12 @@ if filecheck==-1
     Ncyc=[];
     S=[];
 else
-    if UseV2
-    S=shaperead(fnameshape);
+    if UseV2 & strcmp(satellite,'Envisat')||strcmp(satellite,'Jason2')
+        S=shaperead(fnameshape);
+        
     else
-           S=shaperead(fname);
+        S=shaperead(fname);
+      
     end
     
     for i=1:length(S)
@@ -46,16 +49,34 @@ else
         else
          VS(i).Island=-1;
         end
-        if satellite(1)=='E'
+        if satellite(1:2)=='En'
             Ncyc=94;
             VS(i).Rate=18; %Hz
             
         else if satellite(1)=='J'
                 Ncyc=250;
                 VS(i).Rate=20; %Hz
+            else
+                Ncyc=94;
+                VS(i).Rate=20; %Hz
             end
         end
     end
+    %replace VSIDs with proper non ENVi/J2 sat
+    if ~strcmp(VS(1).ID,[Riv '_' satellite '_0']);
+        
+        if strcmp(VS(1).ID,[Riv '_' 'Envisat' '_0']);
+            for k=1:length(VS);
+                VS(k).ID = strrep(VS(k).ID,'Envisat',satellite);
+                 VS(k).Rate = 20 ;
+            end
+        else
+            for k=1:length(VS);
+                VS(k).ID = strrep(VS(k).ID,'Jason2',satellite);
+            end
+        end
+    end
+    
 end
 if stations==0;
     stations=1:length(VS);

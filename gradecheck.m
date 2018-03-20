@@ -1,38 +1,23 @@
 %gradecheck
-function [grade] =gradecheck(VS,sat,riv,Egrades, Jgrades,Ense,Jnse)
-% open relivant grade file
-% gradefile=fullfile('C:\Users\coss.31\Documents\MATH\Steves_final_Toolbox\AltimetryToolbox\IN' ...
-%     ,strcat(sat,'_grades','.xlsx'));
-% [NUM,TXT,RAW]=xlsread(filename);
-% VSname=TXT(:,1);
-% VSgrade=TXT(:,2);
-%% take ggrades that are relivant from the sheet
-if numel(sat)==2
+function [grade] =gradecheck(VS,sat,riv,Egrades, Jgrades)
+
+% take ggrades that are relivant from the sheet
+if strcmp(sat,'Envisat')
     for i=1:length(Egrades);
         Enames(i)=Egrades(i).name;
-        Egrade(i)=Egrades(i).grade;
+        Egrade{i}=Egrades(i).grade;
         Estats(i)=Egrades(i).stats;
     end
+else if strcmp(sat,'Jason2')
     for i=1:length(Jgrades);
         Jnames(i)=Jgrades(i).name;
-        Jgrade(i)=Jgrades(i).grade;
+        Jgrade{i}=Jgrades(i).grade;
         Jstats(i)=Jgrades(i).stats;
     end
-else if strcmp(sat,'Jason2')
-        for i=1:length(Jgrades);
-            Jnames(i)=Jgrades(i).name;
-            Jgrade(i)=Jgrades(i).grade;
-            Jstats(i)=Jgrades(i).stats;
-        end
-    else if strcmp(sat,'Envisat')
-            for i=1:length(Egrades);
-                Enames(i)=Egrades(i).name;
-                Egrade(i)=Egrades(i).grade;
-                Estats(i)=Egrades(i).stats;
-            end
-        end
     end
 end
+ 
+
 if strcmp(sat,'Jason2');
     NAMES=Jnames;
     GRADES=Jgrade;
@@ -52,6 +37,9 @@ end
 %this step determines letter grade or fit stats
 if isnan(STATS(dx(dxindex)).nse)
     grade=GRADES{dx(dxindex)};
+    if iscell(grade)
+        grade=grade{1};
+    end
 else
     grade=STATS(dx(dxindex));
 end

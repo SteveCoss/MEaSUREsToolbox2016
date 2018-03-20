@@ -45,15 +45,40 @@ else if all(fgetl(fid)~= -1)
         end
         
         %% read DEM data
+        %ers DEM info is in a different format
+        if strcmp(VS.Satellite,'Envisat') || strcmp(VS.Satellite,'Jason2')
+        
         delimiter = {' ','  ','   ','    '};
         endRow = 3;
+        
         %  formatSpec='%*[#]%d%*f%*f';
         formatSpec = '%*s%f%f%f%*s%*s%*s%*s%*s%*s%*s%*s%*s%[^\n\r]';
         %formatSpec = '%*3s%10s%*15s%*[^\n\r]';
+        else
+            delimiter = {','};
+            endRow=3;
+          
+            formatSpec = '%s%s%s';
+        end
         fid=fopen(fname);
-        Altimetry.demDat=textscan(fid,formatSpec, endRow, 'Delimiter',delimiter, ...
-            'EmptyValue',NaN,'ReturnOnError', false);
-        fclose(fid);
+     
+            Altimetry.demDat=textscan(fid,formatSpec, endRow,... 
+                'Delimiter',delimiter,'EmptyValue',NaN,'ReturnOnError', false);
+         fclose(fid);
+        if ~strcmp(VS.Satellite,'Envisat') && ~strcmp(VS.Satellite,'Jason2')
+            for k = 1:3;
+                for m=1:3;
+                    delimiter = {'='};
+                    formatSpec = '%*s%f';
+                    Altimetry.demDat{1,k}(m)= textscan(Altimetry.demDat{1,k}{m},...
+                        formatSpec, 'Delimiter',delimiter,... 
+                        'EmptyValue',NaN,'ReturnOnError', false);
+                end
+                 Altimetry.demDat{1,k} = cell2mat(Altimetry.demDat{1,k});
+            end
+        end
+        
+        
         DEM=Altimetry.demDat{1}';
         Altimetry.AvgGradient=Altimetry.demDat{2}';
         Altimetry.RMSGradient=Altimetry.demDat{3}';

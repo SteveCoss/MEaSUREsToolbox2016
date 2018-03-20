@@ -1,4 +1,4 @@
-function WriteAltimetryData(VS,Filter,Ice)
+function WriteAltimetryData(VS,Filter,Ice,V2)
 
 %level 2: these are the level 2 data from the platforms... not archived here
 %Unprocessed GDR data: these are the actual elevations being output by Chan's scripts,
@@ -56,10 +56,16 @@ if ~isstruct(VS.grade);
 vIDs.grade=netcdf.defVar(ncid,'grade','NC_CHAR',gradedimid);
 else
     vIDs.nse=netcdf.defVar(ncid,'nse','NC_DOUBLE',gradedimid);
-    vIDs.nseAVG=netcdf.defVar(ncid,'nseAVG','NC_DOUBLE',gradedimid);
+    vIDs.nsemedian=netcdf.defVar(ncid,'nsemedian','NC_DOUBLE',gradedimid);
     vIDs.R=netcdf.defVar(ncid,'R','NC_DOUBLE',gradedimid);
     vIDs.std=netcdf.defVar(ncid,'std','NC_DOUBLE',gradedimid);
-    vIDs.stdAVG=netcdf.defVar(ncid,'stdAVG','NC_DOUBLE',gradedimid);
+    vIDs.stdmedian=netcdf.defVar(ncid,'stdmedian','NC_DOUBLE',gradedimid);
+    if V2==false
+    vIDs.prox=netcdf.defVar(ncid,'prox','NC_DOUBLE',gradedimid);
+    vIDs.proxSTD=netcdf.defVar(ncid,'proxSTD','NC_DOUBLE',gradedimid);
+    vIDs.proxR=netcdf.defVar(ncid,'proxR','NC_DOUBLE',gradedimid);
+    vIDs.proxE=netcdf.defVar(ncid,'proxE','NC_DOUBLE',gradedimid);
+    end
 end
 
 
@@ -206,6 +212,7 @@ netcdf.putAtt(ncid,vIDs.Lon,'standard_name','longitude');
 
 %3.2.2 other root group
 netcdf.putAtt(ncid,vIDs.ID,'long_name','reference_VS_ID');
+netcdf.putAtt(ncid,vIDs.ID,'coordinates','longitude latitude');%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 netcdf.putAtt(ncid,vIDs.ID,'standard_name','reference_vs_id');
 
 netcdf.putAtt(ncid,vIDs.FlowDistance,'long_name','distance_from_river_mouth');
@@ -230,8 +237,8 @@ else
     netcdf.putAtt(ncid,vIDs.nse,'long_name','MAX nash sutcliffe efficiency');
     netcdf.putAtt(ncid,vIDs.nse,'standard_name','max_nash_sutcliffe_efficiency');
     
-    netcdf.putAtt(ncid,vIDs.nseAVG,'long_name','average nash sutcliffe efficiency');
-     netcdf.putAtt(ncid,vIDs.nseAVG,'standard_name','average_nash_sutcliffe_efficiency');
+    netcdf.putAtt(ncid,vIDs.nsemedian,'long_name','median nash sutcliffe efficiency');
+     netcdf.putAtt(ncid,vIDs.nsemedian,'standard_name','median_nash_sutcliffe_efficiency');
      
     netcdf.putAtt(ncid,vIDs.R,'long_name','correlation coefficient');
      netcdf.putAtt(ncid,vIDs.R,'standard_name','correlation_coefficient');
@@ -240,9 +247,26 @@ else
     netcdf.putAtt(ncid,vIDs.std,'standard_name','min_standard_deviation_of_error');
     netcdf.putAtt(ncid,vIDs.std,'units','m');
     
-    netcdf.putAtt(ncid,vIDs.stdAVG,'long_name','average standard deviation of error');
-    netcdf.putAtt(ncid,vIDs.stdAVG,'standard_name','average_standard_deviation_of_error');
-    netcdf.putAtt(ncid,vIDs.stdAVG,'units','m');
+    netcdf.putAtt(ncid,vIDs.stdmedian,'long_name','median standard deviation of error');
+    netcdf.putAtt(ncid,vIDs.stdmedian,'standard_name','median_standard_deviation_of_error');
+    netcdf.putAtt(ncid,vIDs.stdmedian,'units','m');
+    if V2==false
+    %prox
+     netcdf.putAtt(ncid,vIDs.prox,'long_name','gage proximity of most proximal gage');
+    netcdf.putAtt(ncid,vIDs.prox,'standard_name','gage_proximity_of_most_proximal_gage');
+    netcdf.putAtt(ncid,vIDs.prox,'units','m');
+    
+     netcdf.putAtt(ncid,vIDs.proxSTD,'long_name','standard deviation of error of most proximal gage');
+    netcdf.putAtt(ncid,vIDs.proxSTD,'standard_name','standard_deviation_of_error_of_most_proximal_gage');
+    netcdf.putAtt(ncid,vIDs.proxSTD,'units','m');
+    
+    netcdf.putAtt(ncid,vIDs.proxR,'long_name','correlation coefficient of most proximal gage');
+    netcdf.putAtt(ncid,vIDs.proxR,'standard_name','correlation_coefficient_of_error_of_most_proximal_gage');
+    
+    netcdf.putAtt(ncid,vIDs.proxE,'long_name','Nash Sutcliffe efficiency of most proximal gage');
+    netcdf.putAtt(ncid,vIDs.proxE,'standard_name','Nash_Sutcliffe_efficiency_of_most_proximal_gage');
+    netcdf.putAtt(ncid,vIDs.proxE,'units','m');
+    end
 end
 
 
@@ -279,6 +303,7 @@ netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_h,'units','meters_above_EGM2008_geoid');
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_h,'positive','up');
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_h,'long_name','unprocessed_heights');
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_h,'standard_name','unprocessed_heights');
+%netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_h,'coordinates','longitude latitude');%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_sig0,'units','dB');
 netcdf.putAtt(UGDR_GroupID,vIDs.UGDR_sig0,'long_name','Sigma0');
@@ -386,10 +411,17 @@ if ~isstruct(VS.grade);
 netcdf.putVar(ncid,vIDs.grade,0,length(VS.grade),VS.grade);%grade
 else
 netcdf.putVar(ncid,vIDs.nse,0,length(VS.grade),VS.grade.nse);%grade
-netcdf.putVar(ncid,vIDs.nseAVG,0,length(VS.grade),VS.grade.nseAVG);%grade
+netcdf.putVar(ncid,vIDs.nsemedian,0,length(VS.grade),VS.grade.nsemedian);%grade
 netcdf.putVar(ncid,vIDs.R,0,length(VS.grade),VS.grade.R);%grade
 netcdf.putVar(ncid,vIDs.std,0,length(VS.grade),VS.grade.std);%grade
-netcdf.putVar(ncid,vIDs.stdAVG,0,length(VS.grade),VS.grade.stdAVG);%grade
+netcdf.putVar(ncid,vIDs.stdmedian,0,length(VS.grade),VS.grade.stdmedian);%grade
+if V2==false
+%prox
+netcdf.putVar(ncid,vIDs.prox,0,length(VS.grade),VS.grade.prox);%grade
+netcdf.putVar(ncid,vIDs.proxSTD,0,length(VS.grade),VS.grade.proxSTD);%grade
+netcdf.putVar(ncid,vIDs.proxR,0,length(VS.grade),VS.grade.proxR);%grade
+netcdf.putVar(ncid,vIDs.proxE,0,length(VS.grade),VS.grade.proxE);%grade
+end
 end
 
 

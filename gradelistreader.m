@@ -1,95 +1,125 @@
-%gradelistreader 
+%gradelistreader
 %process grades and store for use in the loop
-function [Egrades,Jgrades]=gradelistreader(sat)
-%envi
-if numel(sat)==2;
-gradefileE=fullfile('C:\Users\coss.31\Documents\MATH\Steves_final_Toolbox\AltimetryToolbox\MEaSUREsToolbox2016\IN' ...
-    ,strcat(sat(2),'_gradesC','.xlsx'));
-[NUM,TXT,RAW]=xlsread(cell2mat(gradefileE));
-if length(TXT)>length(NUM)
-    missing=length(TXT)-length(NUM);
-     start=length(NUM)
-    for i=1:length(missing)
-        NUM( start+(i),:)=nan;
-    end
-end
-for i=1:length(TXT)
-Egrades(i).name=TXT((i),1);
-Egrades(i).grade=TXT((i),2);
-Egrades(i).stats.nse=NUM((i),1);
-Egrades(i).stats.nseAVG=NUM((i),2);
-Egrades(i).stats.R=NUM((i),3);
-Egrades(i).stats.std=NUM((i),4);
-Egrades(i).stats.stdAVG=NUM((i),5);
+function [Egrades,Jgrades]=gradelistreader(sat, UseV2)
+if UseV2
+    Nameappend='_gradesC_V2';
+else
+    
+    Nameappend='_gradesC_V1';
 end
 
-%jason
-gradefileJ=fullfile('C:\Users\coss.31\Documents\MATH\Steves_final_Toolbox\AltimetryToolbox\MEaSUREsToolbox2016\IN' ...
-    ,strcat(sat(1),'_gradesC','.xlsx'));
-[NUM,TXT,RAW]=xlsread(cell2mat(gradefileJ));
-if length(TXT)>length(NUM)
-    missing=length(TXT)-length(NUM);
-     start=length(NUM)
-    for j=1:missing
-        NUM( start+(j),:)=nan;
+%envi
+if numel(sat)==2;
+    gradefileE=fullfile('C:\Users\coss.31\Documents\MATH\Steves_final_Toolbox\AltimetryToolbox\MEaSUREsToolbox2016\IN' ...
+        ,strcat(sat(2), Nameappend,'.xlsx'));
+   
+    [~,~,RAW]=xlsread(cell2mat(gradefileE),'','','basic');
+   
+  S=size(RAW);
+    for i=1:S(1)
+        Egrades(i).name=RAW((i),1);
+        if isempty(RAW{(i),2})
+            Egrades(i).grade=nan
+        else
+        Egrades(i).grade=RAW{(i),2};
+        end
+        Egrades(i).stats.nse=RAW{(i),3};
+        Egrades(i).stats.nsemedian=RAW{(i),4};
+        Egrades(i).stats.R=RAW{(i),5};
+        Egrades(i).stats.std=RAW{(i),6};
+        Egrades(i).stats.stdmedian=RAW{(i),7};
+        if ~UseV2
+        %prox
+        Egrades(i).stats.prox=RAW{(i),9};
+        Egrades(i).stats.proxSTD=RAW{(i),10};
+        Egrades(i).stats.proxR=RAW{(i),11};
+        Egrades(i).stats.proxE=RAW{(i),12};
+        end
+        
     end
-end
     
-for i=1:length(TXT)
-Jgrades(i).name=TXT((i),1);
-Jgrades(i).grade=TXT((i),2);
-Jgrades(i).stats.nse=NUM((i),1);
-Jgrades(i).stats.nseAVG=NUM((i),2);
-Jgrades(i).stats.R=NUM((i),3);
-Jgrades(i).stats.std=NUM((i),4);
-Jgrades(i).stats.stdAVG=NUM((i),5);
-end
+    %jason
+    gradefileJ=fullfile('C:\Users\coss.31\Documents\MATH\Steves_final_Toolbox\AltimetryToolbox\MEaSUREsToolbox2016\IN' ...
+        ,strcat(sat(1), Nameappend,'.xlsx'));
+      [~,~,RAW]=xlsread(cell2mat(gradefileJ),'','','basic');
+    S=size(RAW);
+    for i=1:S(1)
+        Jgrades(i).name=RAW((i),1);
+       if isempty(RAW{(i),2})
+            Jgrades(i).grade=nan
+        else
+        Jgrades(i).grade=RAW((i),2);
+        end
+        Jgrades(i).stats.nse=RAW{(i),3};
+        Jgrades(i).stats.nsemedian=RAW{(i),4};
+        Jgrades(i).stats.R=RAW{(i),5};
+        Jgrades(i).stats.std=RAW{(i),6};
+        Jgrades(i).stats.stdmedian=RAW{(i),7};
+         if ~UseV2
+        %prox
+        Jgrades(i).stats.prox=RAW{(i),9};
+        Jgrades(i).stats.proxSTD=RAW{(i),10};
+        Jgrades(i).stats.proxR=RAW{(i),11};
+        Jgrades(i).stats.proxE=RAW{(i),12};
+         end
+    end
 else if strcmp(sat,'Envisat');
         gradefileE=fullfile('C:\Users\coss.31\Documents\MATH\Steves_final_Toolbox\AltimetryToolbox\MEaSUREsToolbox2016\IN' ...
-            ,strcat(sat,'_gradesC','.xlsx'));
-        [NUM,TXT,RAW]=xlsread(cell2mat(gradefileE));
-        if length(TXT)>length(NUM)
-            missing=length(TXT)-length(NUM);
-            start=length(NUM)
-            for i=1:(missing)
-                NUM( start+(i),:)=nan;
-            end
+            ,strcat(sat, Nameappend,'.xlsx'));
+         [~,~,RAW]=xlsread(cell2mat(gradefileE),'','','basic');
+         S=size(RAW);
+    for i=1:S(1)
+        Egrades(i).name=RAW((i),1);
+       if isempty(RAW{(i),2})
+            Egrades(i).grade=nan
+        else
+        Egrades(i).grade=RAW((i),2);
         end
-        for i=1:length(TXT)
-            Egrades(i).name=TXT((i),1);
-            Egrades(i).grade=TXT((i),2);
-            Egrades(i).stats.nse=NUM((i),1);
-            Egrades(i).stats.nseAVG=NUM((i),2);
-            Egrades(i).stats.R=NUM((i),3);
-            Egrades(i).stats.std=NUM((i),4);
-            Egrades(i).stats.stdAVG=NUM((i),5);
-        end
+        Egrades(i).stats.nse=RAW{(i),3};
+        Egrades(i).stats.nsemedian=RAW{(i),4};
+        Egrades(i).stats.R=RAW{(i),5};
+        Egrades(i).stats.std=RAW{(i),6};
+        Egrades(i).stats.stdmedian=RAW{(i),7};
+         if ~UseV2
+        %prox
+        Egrades(i).stats.prox=RAW{(i),9};
+        Egrades(i).stats.proxSTD=RAW{(i),10};
+        Egrades(i).stats.proxR=RAW{(i),11};
+        Egrades(i).stats.proxE=RAW{(i),12};
+         end
+        
+    end
         %dump empty variable
-         Jgrades=nan;
-         Jnse=nan;
+        Jgrades=nan;
+        Jnse=nan;
     else
         gradefileJ=fullfile('C:\Users\coss.31\Documents\MATH\Steves_final_Toolbox\AltimetryToolbox\MEaSUREsToolbox2016\IN' ...
-            ,strcat(sat,'_gradesC','.xlsx'));
-        [NUM,TXT,RAW]=xlsread(cell2mat(gradefileJ));
-         if length(TXT)>length(NUM)
-            missing=length(TXT)-length(NUM);
-            start=length(NUM)
-            for i=1:(missing)
-                NUM( start+(i),:)=nan;
-            end
+            ,strcat(sat, Nameappend,'.xlsx'));
+       [~,~,RAW]=xlsread(cell2mat(gradefileE),'','','basic');
+         S=size(RAW);
+    for i=1:S(1)
+        Jgrades(i).name=RAW((i),1);
+        if isempty(RAW{(i),2})
+            Jgrades(i).grade=nan
+        else
+        Jgrades(i).grade=RAW((i),2);
         end
-        for i=1:length(TXT)
-            Jgrades(i).name=TXT((i),1);
-            Jgrades(i).grade=TXT((i),2);
-            Jgrades(i).stats.nse=NUM((i),1);
-            Jgrades(i).stats.nseAVG=NUM((i),2);
-            Jgrades(i).stats.R=NUM((i),3);
-            Jgrades(i).stats.std=NUM((i),4);
-            Jgrades(i).stats.stdAVG=NUM((i),5);
-        end
+        Jgrades(i).stats.nse=RAW{(i),3};
+        Jgrades(i).stats.nsemedian=RAW{(i),4};
+        Jgrades(i).stats.R=RAW{(i),5};
+        Jgrades(i).stats.std=RAW{(i),6};
+        Jgrades(i).stats.stdmedian=RAW{(i),7};
+         if ~UseV2
+        %prox
+        Jgrades(i).stats.prox=RAW{(i),9};
+        Jgrades(i).stats.proxSTD=RAW{(i),10};
+        Jgrades(i).stats.proxR=RAW{(i),11};
+        Jgrades(i).stats.proxE=RAW{(i),12};
+         end
+    end
         %dump empty variable
-         Egrades=nan;
-         Ense=nan;
+        Egrades=nan;
+        Ense=nan;
         
     end
 end

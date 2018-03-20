@@ -51,11 +51,13 @@ end
 %     end
 % end
 %% find new point using manoveride
+if ~isempty(manoveride);
 for i=1:length(manoveride)
     or(i).or=find(segID==manoveride(i));
 end
 or=[or.or];
 dex=[dex or];
+end
 if ~isempty(junklist)& isempty(intersect(nextseg(1:k-2),nextseg(k-1)))
     difdex=setdiff(1:1:length(segID),dex,'legacy');
     difdex=union(difdex,dexj);

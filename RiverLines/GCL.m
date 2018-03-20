@@ -90,13 +90,40 @@ S=flip(S)
  
  
  %reproject lenterline points
-mstruct = defaultm('eqaazim ');
+ZONE = utmzone(Yline, Xline);
+mstruct = defaultm('utm');
+mstruct.zone = ZONE;
 mstruct.geoid = almanac('earth','wgs84','meters');
 mstruct = defaultm(mstruct);
 [X,Y]=mfwdtran(mstruct,Yline,Xline);
 %mapshow(S)
+% %% make sure they are in the correct order
+% data=ones(length(X),2);
+% data(:,1)=X;
+% data(:,2)=Y;
+% dist = pdist2(data,data);
+% 
+% 
+% N = size(data,1);
+% result = NaN(1,N);
+% %find the start point
+% stpoint = min(find([S.flow_acc]== min([S.flow_acc])));
+% result(1) = stpoint; % first point is first row in data matrix
+% k=1
+% for ii=2:N
+%     dist(:,result(ii-1)) = Inf;
+%     [close, closest_idx] = min(dist(result(ii-1),:));
+%     wazup(k)=close;
+%     k=k+1;
+%     result(ii) = closest_idx;
+% end
+% goodresult = wazup < nanmedian(wazup)*2;
+% result = result(goodresult);
+% S=S(result);
+% X = X(result);
+% Y = Y(result);
 
-FD=zeros(size(Xline));
+FD=zeros(size(X));
 for i=2:length(FD),
    
     FD(i)=FD(i-1)+sqrt( (X(i)-X(i-1))^2 + (Y(i)-Y(i-1))^2 );
@@ -107,37 +134,90 @@ end
      shapewrite(S,strcat(River,'_','centerline'));
 else
     % get rid of duplicate vertacies
+    if isfield(S,'ORIG_FID')
+    if length(unique([S.ORIG_FID])) < length(S)%if there are duplicates
    Keep=1:2:length(S);
    S=S(Keep)
+    end
+    end
     Xline=[S.X];
   Yline=[S.Y];
+       %reproject lenterline points
+ZONE = utmzone(Yline, Xline);
+mstruct = defaultm('utm');
+mstruct.zone = ZONE;
 
- 
-
-     %reproject lenterline points
- mstruct = defaultm('balthsrt');
  mstruct.geoid = almanac('earth','wgs84','meters');
  mstruct = defaultm(mstruct);
  [X,Y]=mfwdtran(mstruct,Yline,Xline);
+ X=smooth(X);
+ Y=smooth(Y);
 %% make sure they are in the correct order
 data=ones(length(X),2);
 data(:,1)=X;
 data(:,2)=Y;
+%this next step crashes if data is too large break it into two if above a
+%certain size
+if length(data)>70000;
+    fprintf('Large size has triggered 1 by approach');
+   % find closest point one point at a time :(
+   
+if isfield(S,'ORIG_FID')
+stpoint = find([S.ORIG_FID]==STpnt);
+else
+    stpoint = find([S.OBJECTID]==STpnt);
+end
+I(1)=stpoint
+corddex = 1:1:length(X);
+corddex = find(corddex~=I);
+Xset=X(corddex);
+Yset=Y(corddex);
+for i=1:length(X)-1
+    
+    [blork Icheck]= min(sqrt( (X(I(i))-Xset).^2 + (Y(I(i))-Yset).^2 ));
+    I(i+1)=corddex(Icheck);
+ [C   CDI] = setdiff(corddex,I);
+ corddex=corddex(CDI);
+    Xset=X(C);
+    Yset=Y(C);
+end
+S=S(I);
+X = X(I);
+Y = Y(I);
+    
+else
 dist = pdist2(data,data);
 
 
 N = size(data,1);
 result = NaN(1,N);
 %find the start point
+if isfield(S,'ORIG_FID')
 stpoint = find([S.ORIG_FID]==STpnt);
+else
+    stpoint = find([S.OBJECTID]==STpnt);
+end
 result(1) = stpoint; % first point is first row in data matrix
-
+k=1
 for ii=2:N
     dist(:,result(ii-1)) = Inf;
-    [~, closest_idx] = min(dist(result(ii-1),:));
+    [close, closest_idx] = min((dist(result(ii-1),:)));
+    wazup(k)=close;
+    k=k+1;
     result(ii) = closest_idx;
 end
+goodresult = wazup < nanmedian(wazup)*1.5;
+% %shift 1 because diff
+% BAD=find(goodresult == 0);
+% BAD2 = BAD+1;
+% BAD3 = BAD-1;
+% goodresult(BAD2)=0
+% goodresult(BAD3)=0
+result=result(goodresult);
 S=S(result);
+X = X(result);
+Y = Y(result);
+end
 % %check order
 % if S(1).ORIG_FID==STpnt
 %     S=S
@@ -147,7 +227,7 @@ S=S(result);
 % end
 
 
-    FD=zeros(size(X));
+    FD=zeros(size(S));
     for i=2:length(FD),
    
     FD(i)=FD(i-1)+sqrt( (X(i)-X(i-1))^2 + (Y(i)-Y(i-1))^2 );

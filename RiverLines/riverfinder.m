@@ -5,8 +5,8 @@ clear all; close all; clc
 
 %% to generate a center line
 Lineorgrats=2 %1=generate line, 2 = altergrrats
-River = 'Kuloy';
-Sat='Jason2'
+River = 'Yukon';
+Sat= 'Envisat'%'Envisat'
 switch Lineorgrats
     case {1}
 generatecenterline=1;% Generate a river centerline from point data
@@ -18,18 +18,19 @@ end
         %change Flow Distance for VS in GRRATS file and make V2
 %% is this river in SRTM coverage ?
 SRTMcenter=false
-%if not whats the starting points origional fid
-STpnt=809
+%if not whats the starting points origional fid (This is the one at the
+%mouth
+STpnt=1
  if SRTMcenter
-StartSeg=1271;
-endseg=830;
+StartSeg=878 ;%top
+endseg=2041; %mouth
 RemovebadPoint=true%use this when VS are very near to ocean and in -9999 zone
 %% lake block removal 
 LR.LR=false;
 LR.upgood=1271;
 LR.downgood=830;
    
-manoveride=[1280,1624,1614,1799]
+manoveride= []%[1581, 1763,3273,1732,3295]
  else
      LR=[]
      manoveride=[]
@@ -69,15 +70,20 @@ else
 end
 if alterGRRATS
 %% extract centerline info
- if SRTMcenter
- Xline=[S.longitude];
- Yline=[S.latitude];
- FD=[S.Flow_Dist]
- else
- FD=[S.Flow_Dist];
-  Xline=[S.lon];
- Yline=[S.lat];
- end
+if SRTMcenter
+    Xline = [S.longitude];
+    Yline=[S.latitude];
+    FD=[S.Flow_Dist]
+else if isfield(S,'lon');
+        FD=[S.Flow_Dist];
+        Xline=[S.lon];
+        Yline=[S.lat];
+    else
+        Xline=[S.longitude];
+        Yline=[S.latitude];
+        FD =[S.Flow_Dist];
+    end
+end
      
 
 %%find flow distance for each polygon

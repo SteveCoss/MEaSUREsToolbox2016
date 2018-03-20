@@ -1,0 +1,15 @@
+cat >vs_inpdata$0 <<EOF
+&inparms
+joybid = 'ColumbiaERS1c',
+ cyc1 = 83, cyc2 = 101,
+ pathdb= '/7/raw/RP01/ERS1/C',
+ limitlength = F /
+EOF
+src=/ocean/yi.3/preswot/j2/src
+f90 -O2 -o $0.x -I/usr/local/include $src/e2virtus_v0.f90 $src/inpolygon.f90 $src/shplib.f90 \
+$src/medfit.f $src/egm08wgs84.f $src/histo.f -L/usr/local/lib -lnetcdff -lshp-fortran
+
+export LD_LIBRARY_PATH=/usr/local/lib
+time $0.x $0
+
+rm -f $0.x vs_inpdata$0
