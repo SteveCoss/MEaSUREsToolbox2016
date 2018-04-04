@@ -84,13 +84,6 @@ if ERS1c.Flag ~=1
     fprintf(FID,'\r%s,',char(ERS1c.WRITTEN(i)));
     end
 end
-if ERS1g.Flag ~=1
-   A4 = length(ERS1g.WRITTEN);
-   
-    for i=1:A4
-    fprintf(FID,'\r%s,',char(ERS1g.WRITTEN(i)));
-    end
-end
     fclose(FID);
     
 end

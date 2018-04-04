@@ -83,9 +83,9 @@ S=S(alldex);
 % [~,isort]=sort(F,'descend');
 % S=S(isort);
 
-S=flip(S)
-  Xline=[S.longitude];
-  Yline=[S.latitude];
+% S=flip(S)
+%   Xline=[S.longitude];
+%   Yline=[S.latitude];
 
  
  
@@ -96,6 +96,8 @@ mstruct.zone = ZONE;
 mstruct.geoid = almanac('earth','wgs84','meters');
 mstruct = defaultm(mstruct);
 [X,Y]=mfwdtran(mstruct,Yline,Xline);
+X=smooth(X);
+ Y=smooth(Y);
 %mapshow(S)
 % %% make sure they are in the correct order
 % data=ones(length(X),2);
@@ -150,8 +152,8 @@ mstruct.zone = ZONE;
  mstruct.geoid = almanac('earth','wgs84','meters');
  mstruct = defaultm(mstruct);
  [X,Y]=mfwdtran(mstruct,Yline,Xline);
- X=smooth(X);
- Y=smooth(Y);
+%  X=smooth(X);
+%  Y=smooth(Y);
 %% make sure they are in the correct order
 data=ones(length(X),2);
 data(:,1)=X;
@@ -161,29 +163,38 @@ data(:,2)=Y;
 if length(data)>70000;
     fprintf('Large size has triggered 1 by approach');
    % find closest point one point at a time :(
+   % start by sorting by flow accumulation
+   %Sort centerline by flowacc
+%    F=[S.flow_acc];
+%  [~,isort]=sort(F,'descend');
+%  X=X(isort);
+% Y=Y(isort);
+
    
 if isfield(S,'ORIG_FID')
 stpoint = find([S.ORIG_FID]==STpnt);
+IDD=[S.ORIG_FID];
 else
     stpoint = find([S.OBJECTID]==STpnt);
+    IDD=[S.OBJECTID];
 end
 I(1)=stpoint
-corddex = 1:1:length(X);
-corddex = find(corddex~=I);
-Xset=X(corddex);
-Yset=Y(corddex);
+CDX=1:1:length(X);
+CDXL=CDX>0;
+CDXL(I)=0;
 for i=1:length(X)-1
     
-    [blork Icheck]= min(sqrt( (X(I(i))-Xset).^2 + (Y(I(i))-Yset).^2 ));
-    I(i+1)=corddex(Icheck);
- [C   CDI] = setdiff(corddex,I);
- corddex=corddex(CDI);
-    Xset=X(C);
-    Yset=Y(C);
+    [blork Icheck]= min(abs(sqrt( (X(I(i))-X(CDXL)).^2 + (Y(I(i))-Y(CDXL)).^2 )));
+    lookat=(CDX(CDXL));
+    I(i+1)=lookat(Icheck);
+    CDXL(I(i+1))=0;
 end
 S=S(I);
 X = X(I);
 Y = Y(I);
+%smooth before FD but after order correction
+X=smooth(X);
+Y=smooth(Y);
     
 else
 dist = pdist2(data,data);
@@ -217,6 +228,8 @@ result=result(goodresult);
 S=S(result);
 X = X(result);
 Y = Y(result);
+X=smooth(X);
+Y=smooth(Y);
 end
 % %check order
 % if S(1).ORIG_FID==STpnt

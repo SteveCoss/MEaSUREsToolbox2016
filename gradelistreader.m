@@ -7,7 +7,15 @@ else
     
     Nameappend='_gradesC_V1';
 end
-
+%checking for non Jason and Envisat data
+for i = 1:length(sat)
+if strcmp(sat{i},'Jason2')||strcmp(sat{i},'Envisat')
+    Satcheck(i) =1;
+else
+    Satcheck(i) =0;
+end
+end
+if sum(Satcheck) == i
 %envi
 if numel(sat)==2;
     gradefileE=fullfile('C:\Users\coss.31\Documents\MATH\Steves_final_Toolbox\AltimetryToolbox\MEaSUREsToolbox2016\IN' ...
@@ -95,7 +103,7 @@ else if strcmp(sat,'Envisat');
     else
         gradefileJ=fullfile('C:\Users\coss.31\Documents\MATH\Steves_final_Toolbox\AltimetryToolbox\MEaSUREsToolbox2016\IN' ...
             ,strcat(sat, Nameappend,'.xlsx'));
-       [~,~,RAW]=xlsread(cell2mat(gradefileE),'','','basic');
+       [~,~,RAW]=xlsread(cell2mat(gradefileJ),'','','basic');
          S=size(RAW);
     for i=1:S(1)
         Jgrades(i).name=RAW((i),1);
@@ -123,4 +131,11 @@ else if strcmp(sat,'Envisat');
         
     end
 end
+else
+    %will fill this in later with grade sheets for the other alts
+    %generating dummy data for now.
+    Egrades = [];
+    Jgrades = [];
+end
+
 end

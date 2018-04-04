@@ -1,6 +1,7 @@
 %gradecheck
 function [grade] =gradecheck(VS,sat,riv,Egrades, Jgrades)
-
+%% check if grades are empty
+if ~isempty(Egrades) && ~isempty(Egrades)
 % take ggrades that are relivant from the sheet
 if strcmp(sat,'Envisat')
     for i=1:length(Egrades);
@@ -42,5 +43,8 @@ if isnan(STATS(dx(dxindex)).nse)
     end
 else
     grade=STATS(dx(dxindex));
+end
+else
+    grade = 'Z';
 end
 return

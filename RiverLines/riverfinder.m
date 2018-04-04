@@ -5,8 +5,8 @@ clear all; close all; clc
 
 %% to generate a center line
 Lineorgrats=2 %1=generate line, 2 = altergrrats
-River = 'Yukon';
-Sat= 'Envisat'%'Envisat'
+River = 'Amazon';
+Sat= 'Jason2'%'Envisat'
 switch Lineorgrats
     case {1}
 generatecenterline=1;% Generate a river centerline from point data
@@ -17,13 +17,13 @@ alterGRRATS=1
 end
         %change Flow Distance for VS in GRRATS file and make V2
 %% is this river in SRTM coverage ?
-SRTMcenter=false
+SRTMcenter=false % this seems broken at this point.....
 %if not whats the starting points origional fid (This is the one at the
 %mouth
-STpnt=1
+STpnt=141556
  if SRTMcenter
-StartSeg=878 ;%top
-endseg=2041; %mouth
+StartSeg=476 ;%top
+endseg=130; %mouth
 RemovebadPoint=true%use this when VS are very near to ocean and in -9999 zone
 %% lake block removal 
 LR.LR=false;
