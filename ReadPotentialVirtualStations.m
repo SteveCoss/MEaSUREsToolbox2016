@@ -7,15 +7,27 @@ else
     fname=[fname '_' satellite];
 end
 %% associate with right file name endings based on sample frequency
-if satellite(1:2)=='En'
-    filecheck=fopen([fname '_0_18hz']);
-else if satellite(1:2)=='Ja'
-        filecheck=fopen([fname '_0_20hz']);
-    else
-        filecheck=fopen([fname '_0_10hz']);
-    end
+%This checks for station0 which is not always available....
+% if strcmp(satellite(1:2),'En');
+%     filecheck=fopen([fname '_0_18hz']);
+% else if strcmp(satellite(1:2),'Ja') || strcmp(satellite(1:2),'ER');
+%         filecheck=fopen([fname '_0_20hz']);
+%     else if strcmp(satellite(1:2),'To');
+%         filecheck=fopen([fname '_0_10hz']);
+%         
+%         end
+%     end
+% end
+INdir=dir('C:\Users\coss.31\Documents\MATH\Steves_final_Toolbox\AltimetryToolbox\MEaSUREsToolbox2016\IN');
+for i = 3: length(INdir)
+   if~isempty(strfind(INdir(i).name,fname))
+       filecheck =1;
+   end
 end
-%verify file present
+if isempty(filecheck)
+    filecheck =-1;
+end
+%%verify file present
 if filecheck==-1
     VS=[];
     Ncyc=[];
@@ -80,6 +92,14 @@ else
                 else if satellite(1:2)=='To'
                         Ncyc=289;
                 VS(i).Rate=10; %Hz
+                 else if satellite(1:5)=='ERS1g'%need to correct these cycle numbers
+                Ncyc=12;
+                VS(i).Rate=20; %Hz
+                 else if satellite(1:5)=='ERS1c'%need to correct these cycle numbers
+                Ncyc=30;
+                VS(i).Rate=20; %Hz
+                     end
+                     end
                 end
             end
         end

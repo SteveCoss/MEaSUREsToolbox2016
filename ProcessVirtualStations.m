@@ -25,8 +25,8 @@ CurrRiv={'Congo'}; %if you want to do a single river, use this
 Americas=[NorthAmerica SouthAmerica];
 World=[Americas Africa Eurasia];
 RunRiv=CurrRiv; %you can switch this to CurrRiv if you only want to run one river.
-Satellite={'Jason2'};
-%'Jason2','Envisat','ERS1c', 'ERS1g', 'ERS2'}; %either Envisat or Jason2 or both ('ERS1c', 'ERS1g', 'ERS2'), need a cell with 1 or more strings
+Satellite={'ERS1c'};
+%'Jason2','Envisat','ERS1c', 'ERS1g', 'ERS2'}; %either Envisat or Jason2 or both ('ERS1c', 'ERS1g', 'ERS2','TopexPos), need a cell with 1 or more strings
 J2=[]; Env=[]; ERS1c=[]; ERS1g=[]; ERS2=[]; Top = [];
 %omit tital stations
 tide=true;
